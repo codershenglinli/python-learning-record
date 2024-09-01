@@ -4,8 +4,10 @@
 """
 str = {'apple', '苹果', 'python', 'gitbash', 3e-1, 9.090, 10, 10}
 database = {'apple', 'mission', 'dream', 'persistence'}
+
 # 集合a中包含的，集合b中没有的元素
 print('str和database中的差集', str - database)
+print()
 print('database和str的不同时拥有的集合', database ^ str)
 # print(str[-1:-4:-1]*3+str, end=" "
 print(database)
