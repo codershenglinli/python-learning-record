@@ -1,3 +1,11 @@
 {
+<<<<<<< HEAD
     "git.ignoreLimitWarning": true
+=======
+    "files.associations": {
+        "iostream": "cpp",
+        "random": "cpp",
+        "cmath": "cpp"
+    }
+>>>>>>> 0ac7e1b2ca0eaae22e34807739c167023dac9b8b
 }
