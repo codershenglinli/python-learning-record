@@ -1,8 +1,6 @@
 # 这是注释
-"""
-相当于：/*   */
-"""
-str = {'apple', '苹果', 'python', 'gitbash', 3e-1, 9.090, 10, 10}
+
+str = {'apple', '苹果', 'python', 'gitbash', 3e-1, 9.090, 10, 100}
 database = {'apple', 'mission', 'dream', 'persistence'}
 
 # 集合a中包含的，集合b中没有的元素
