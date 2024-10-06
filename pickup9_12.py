@@ -60,52 +60,22 @@ def mouse_track():
 # 在气膜界面完成抢票/刷新的任务，其他抢票
 def action():
     while True:
-        global start_flag
+        global start_flag, interrupt_flag
         time.sleep(0.5)
         while interrupt_flag and start_flag:
             pyautogui.press('f5')
             #  1. 选择最新一天的场地位置
-            time.sleep(0.05)
-            pyautogui.click(1900, 1000)
-            time.sleep(0.05)  # 界面存在明显的延迟，该参数待修正
-
+            time.sleep(3)
+            pyautogui.click(600, 1000)  # 根据想要捡漏的日期进行调整，当天是600 最新一天是1900
             # 2. 滑轮下移
             mouse_drag(2540, 155, 2542, 486)  # 513为使用乒乓球界面进行测试，486为气膜界面
+            time.sleep(0.1)
             # 放弃9-12，直接选1~4
-            # mouse_drag(1020, 1471, 1490, 1471)   # 再来一个鼠标横移，露出9~12部分的场地
-            while True:
-                screenshot = pyautogui.screenshot(region=(700, 900, 920, 350))
-                screenshot = cv2.cvtColor(np.array(screenshot),
-                                          cv2.COLOR_RGB2BGR)
-
-                # 创建/清空screenshot文件夹
-                folder = 'screenshot_scan'
-                if not os.path.exists(folder):
-                    os.makedirs(folder)
-                else:
-                    for filename in os.listdir(folder):
-                        file_path = os.path.join(folder, filename)
-                        try:
-                            if os.path.isfile(file_path):
-                                os.unlink(file_path)
-                        except Exception as e:
-                            print(f"无法删除文件 {file_path}: {e}")
-
-                screenshot_path = os.path.join(folder, 'latest_screenshot.png')
-                cv2.imwrite(screenshot_path, screenshot)
-
-                # 5. 检查截图区域是否有RGB为（255,191,42）的颜色// 通过颜色判定是否成功选上该场地
-                target_color = np.array([42, 191, 255])  # OpenCV使用BGR顺序
-                mask = cv2.inRange(screenshot, target_color, target_color)
-                if np.any(mask):
-                    mouse_drag(1020, 1471, 1490, 1471)
-                    break
-                else:
-                    print("扫描ing")
-            time.sleep(0.05)
+            mouse_drag(1020, 1471, 1490, 1471)   # 再来一个鼠标横移，露出9~12部分的场地
+           
             # 3. 根据时间选择截图位置
             if start is not None and end is not None:
-                left = int(1100)  # 考虑场地灯光，默认抢9~12号场，1100 场地坐标不需要动
+                left = int(500)  # 考虑场地灯光，默认抢9~12号场，1100 场地坐标不需要动 妥协的话选400
                 top = int((1105 + (start - 18) * 70))  # 截图范围的起始时间（不需要改）
                 width = int(1520-left)  # 取的右边线，即12号场的位置
                 height = int((end - start) * 70)  # 截图的高度由输入的时间决定
@@ -117,7 +87,7 @@ def action():
             screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
             # 创建/清空screenshot文件夹
-            folder = 'screenshot'
+            folder = 'pickup_qimo'
             if not os.path.exists(folder):
                 os.makedirs(folder)
             else:
@@ -150,12 +120,17 @@ def action():
                 
                 # 点击目标颜色位置
                 pyautogui.click(screen_x, screen_y)  # 点击有空的场次
-                
+                print("x= %d" % screen_x, "y = %d " % screen_y)
+                time.sleep(0.05)
                 # 执行额外的点击操作
                 pyautogui.click(2000, 1450)  # 点击立即下单按钮
-                pyautogui.click(1000, 1130)  # 点击已知同意按钮
+                time.sleep(0.05)
+                pyautogui.click(984, 1130)  # 点击已知同意按钮
+                time.sleep(0.05)
                 pyautogui.click(1386, 1218)  # 点击立即支付
                 time.sleep(0.5)
+                print("程序执行完毕，退出。")
+                interrupt_flag = False
                 print("程序执行完毕，退出。")
                 sys.exit(0)  # 退出整个程序
             else:
@@ -163,6 +138,10 @@ def action():
                 mouse_drag(2540, 486, 2542, 155)  # 回位便于刷新
                 # pyautogui.press('f5')  # 刷新页面
                 time.sleep(0.01)  # 等待页面刷新
+                now = datetime.now()
+                if now.hour == 13 and now.minute == 0:
+                    interrupt_flag = False
+                    break
            
         if interrupt_flag is False:
             break
@@ -195,6 +174,16 @@ listener_thread.join()
 mouse_thread.join()
 action_thread.join()
 
+'''
+气膜蹲场使用指南：
+ 1、启动程序
+    示例：在命令行中输入python <filename> -s 17 -e 22 12 0 1
+    17 22 表示扫描17点~22点的场地 12 0 1 表示程序从12：00：01 开始运行
+2、打开浏览器，全屏，登录、进入气膜界面，确保右侧滑块位于最顶端
+3、按下“ctrl+y”，程序开始扫描，捡漏成功后自动停止，手动点击付款即可 需要全程停留在浏览器界面
+4、按下“ctrl+Q”停止扫描，程序终止
+ 
+'''
 
 ''' 
 # 自动返回当前分辨率下鼠标坐标
